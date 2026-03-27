@@ -15,12 +15,12 @@ ollama_fast  = ChatOllama(model="qwen2.5:3b",  temperature=0)   # lightweight
 embeddings   = OllamaEmbeddings(model="nomic-embed-text")        # local embeddings
 
 # ── Groq (free cloud, needs GROQ_API_KEY) ───────────────────
-# llama3-8b-8192     — fast, great quality
-# mixtral-8x7b-32768 — large context window (32k tokens)
-# gemma2-9b-it       — Google's Gemma 2
+# llama-3.1-8b-instant    — fast, great quality (replaces llama3-8b)
+# llama-3.3-70b-versatile — powerful, best quality
+# qwen/qwen3-32b           — Alibaba Qwen3
 
-groq_llm     = ChatGroq(model="llama3-8b-8192",     temperature=0)
-groq_large   = ChatGroq(model="mixtral-8x7b-32768", temperature=0)  # 32k context
+groq_llm     = ChatGroq(model="llama-3.1-8b-instant",   temperature=0)  # fast, free
+groq_large   = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)  # powerful
 
 # ── Model Selection Guide ────────────────────────────────────
 # Use ollama_llm  → offline work, sensitive data, no rate limits
