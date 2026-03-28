@@ -1,5 +1,3 @@
-version: '3.8'
-
 # RAGFlow Docker Setup
 # Usage:
 #   docker-compose -f ragflow/docker-compose.yml up -d
