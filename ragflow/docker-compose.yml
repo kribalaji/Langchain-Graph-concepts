@@ -1,0 +1,28 @@
+version: '3.8'
+
+# RAGFlow Docker Setup
+# Usage:
+#   docker-compose -f ragflow/docker-compose.yml up -d
+#   Access UI at: http://localhost:80
+#   API at:       http://localhost:80/api/v1
+
+services:
+  ragflow:
+    image: infiniflow/ragflow:v0.17.2
+    container_name: ragflow
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ragflow_data:/ragflow/data
+    environment:
+      - RAGFLOW_API_KEY=${RAGFLOW_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  ragflow_data:

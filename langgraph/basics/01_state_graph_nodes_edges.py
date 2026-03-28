@@ -12,7 +12,7 @@ load_dotenv()
 
 # ── Model Setup ──────────────────────────────────────────────
 ollama_llm = ChatOllama(model="mistral:7b", temperature=0.3)
-groq_llm   = ChatGroq(model="llama3-8b-8192", temperature=0.3)
+groq_llm   = ChatGroq(model="llama-3.1-8b-instant", temperature=0.3)
 
 # ── 1. Define State Schema ───────────────────────────────────
 # State is a TypedDict — shared data passed between all nodes

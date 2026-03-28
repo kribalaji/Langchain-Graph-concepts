@@ -17,7 +17,7 @@ from langchain.text_splitter import (
 load_dotenv()
 
 ollama_llm = ChatOllama(model="mistral:7b", temperature=0)
-groq_llm   = ChatGroq(model="llama3-8b-8192", temperature=0)
+groq_llm   = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
 
 # ── Sample Documents ─────────────────────────────────────────
 raw_docs = [

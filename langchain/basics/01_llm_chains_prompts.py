@@ -7,7 +7,7 @@ from langchain_ollama import ChatOllama
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -16,8 +16,7 @@ load_dotenv()
 ollama_llm = ChatOllama(model="mistral:7b", temperature=0)
 
 # Groq: free cloud API — get key at https://console.groq.com
-# Supported models: llama3-8b-8192, mixtral-8x7b-32768, gemma2-9b-it
-groq_llm = ChatGroq(model="llama3-8b-8192", temperature=0)
+groq_llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
 
 # ── 1. Basic LLM Call ────────────────────────────────────────
 print("=" * 50)

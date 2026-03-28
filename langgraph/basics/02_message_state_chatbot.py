@@ -14,7 +14,7 @@ from typing_extensions import TypedDict
 load_dotenv()
 
 ollama_llm = ChatOllama(model="qwen2.5:3b", temperature=0.3)   # lightweight local
-groq_llm   = ChatGroq(model="llama3-8b-8192", temperature=0.3)
+groq_llm   = ChatGroq(model="llama-3.1-8b-instant", temperature=0.3)
 
 # ── 1. Message State ─────────────────────────────────────────
 # add_messages reducer: APPENDS new messages instead of overwriting
