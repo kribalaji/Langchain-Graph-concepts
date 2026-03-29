@@ -1,26 +1,127 @@
-# RAGFlow Docker Setup
+# RAGFlow Full Stack Docker Setup
+# Includes: RAGFlow + Elasticsearch + MySQL + Redis + MinIO
 # Usage:
 #   docker-compose -f ragflow/docker-compose.yml up -d
 #   Access UI at: http://localhost:80
-#   API at:       http://localhost:80/api/v1
 
 services:
+
+  # ── Elasticsearch (vector + full-text search) ──────────────
+  es01:
+    image: elasticsearch:8.11.3
+    container_name: es01
+    environment:
+      - node.name=es01
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  # ── MySQL (metadata storage) ────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: ragflow-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: infini_rag_flow
+      MYSQL_DATABASE: rag_flow
+      MYSQL_USER: ragflow
+      MYSQL_PASSWORD: infini_rag_flow
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pinfini_rag_flow"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # ── Redis (caching + task queue) ────────────────────────────
+  redis:
+    image: redis:7
+    container_name: ragflow-redis
+    command: redis-server --requirepass infini_rag_flow
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "infini_rag_flow", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── MinIO (object storage for documents) ───────────────────
+  minio:
+    image: minio/minio
+    container_name: ragflow-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - miniodata:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── RAGFlow (main app) ──────────────────────────────────────
   ragflow:
     image: infiniflow/ragflow:v0.17.2
     container_name: ragflow
     ports:
       - "80:80"
-      - "443:443"
-    volumes:
-      - ragflow_data:/ragflow/data
+      - "9380:9380"
     environment:
-      - RAGFLOW_API_KEY=${RAGFLOW_API_KEY:-}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=ragflow
+      - MYSQL_PASSWORD=infini_rag_flow
+      - MYSQL_DBNAME=rag_flow
+      - ES_HOST=es01
+      - ES_PORT=9200
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=infini_rag_flow
+      - MINIO_HOST=minio
+      - MINIO_PORT=9000
+      - MINIO_USER=minioadmin
+      - MINIO_PASSWORD=minioadmin
+    depends_on:
+      es01:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ragflowdata:/ragflow/data
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
 volumes:
-  ragflow_data:
+  esdata:
+  mysqldata:
+  redisdata:
+  miniodata:
+  ragflowdata:
